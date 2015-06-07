@@ -206,13 +206,16 @@ $.get("industry",function(json){
         ,"json");
 
 $.get("area",function(json){
-        area.xAxis[0].data=json.type;
-        area.series[0]["data"]=json.num;
+        var len=json.data.length;
+        for(var i=0;i<len;i++){
+            area.xAxis[0].data.push(json.data[i].name);
+            area.series[0]["data"].push(json.data[i].value);
+        }
         }
         ,"json");
 
-$.get("map",function(json){
-        china_map.series[0]["data"]=json.map_data;
+$.get("area",function(json){
+        china_map.series[0]["data"]=json.data;
         }
         ,"json");
 
