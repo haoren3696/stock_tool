@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>home</title>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="industry" style="height:600px"></div>
+<hr />
+<div id="pie" style="height:600px"></div>
+<hr />
+<div id="area" style="height:600px"></div>
+<hr />
+<div id="map" style="height:600px"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+// 路径配置
+require.config({
+paths: {
+echarts: 'http://echarts.baidu.com/build/dist'
+}
+});
+
+var industry= {
+tooltip: {
+show: true
+         },
+legend: {
+data:['沪深各行业上市公司数量统计']
+        },
+xAxis : [
+        {
+axisLabel:{rotate:60,},
+          type : 'category',
+          data : []
+        }
+         ],
+             yAxis : [
+             {
+type : 'value'
+             }
+         ],
+             series : [
+             {
+                 "name":"销量",
+                 "type":"bar",
+                 "data":[]
+             }
+         ]
+};
+
+var area= {
+tooltip: {
+show: true
+         },
+legend: {
+data:['中国各省沪深上市公司数量统计']
+        },
+xAxis : [
+        {
+axisLabel:{rotate:60,},
+          type : 'category',
+          data : []
+        }
+         ],
+             yAxis : [
+             {
+type : 'value'
+             }
+         ],
+             series : [
+             {
+                 "name":"销量",
+                 "type":"bar",
+                 "data":[]
+             }
+         ]
+};
+
+var china_map= {
+title : {
+text: '沪深上市公司地域分布',
+      subtext: '',
+      x:'center'
+        },
+tooltip : {
+trigger: 'item'
+          },
+legend: {
+orient: 'vertical',
+        x:'left',
+        data:['沪深上市公司分布图']
+        },
+dataRange: {
+min: 0,
+     max: 300,
+     x: 'left',
+     y: 'bottom',
+     text:['高','低'],           // 文本，默认为数值文本
+     calculable : true
+           },
+toolbox: {
+show: true,
+      orient : 'vertical',
+      x: 'right',
+      y: 'center',
+      feature : {
+mark : {show: true},
+       dataView : {show: true, readOnly: false},
+       restore : {show: true},
+       saveAsImage : {show: true}
+      }
+         },
+roamController: {
+show: true,
+      x: 'right',
+      mapTypeControl: {
+          'china': true
+      }
+                },
+series : [
+         {
+name: '沪深上市公司数量',
+      type: 'map',
+      mapType: 'china',
+      itemStyle:{
+normal:{label:{show:true}},
+       emphasis:{label:{show:true}}
+      },
+data:[
+     {name: '北京',value: Math.round(Math.random()*1000)},
+     {name: '天津',value: Math.round(Math.random()*1000)},
+     {name: '上海',value: Math.round(Math.random()*1000)},
+     {name: '广东',value: Math.round(Math.random()*1000)},
+     {name: '台湾',value: Math.round(Math.random()*1000)},
+     {name: '香港',value: Math.round(Math.random()*1000)},
+     {name: '澳门',value: Math.round(Math.random()*1000)}
+      ]
+         }
+        ]
+};
+
+var pie= {
+title : {
+text: '沪深上市公司行业分布',
+      subtext: '',
+      x:'right',
+      y:'bottom'
+        },
+tooltip : {
+trigger: 'item',
+         formatter: "{a} <br/>{b} : {c} ({d}%)"
+          },
+legend: {
+        orient : 'vertical',
+         x : 'left',
+         data:[],
+        },
+toolbox: {
+show : true,
+       feature : {
+mark : {show: true},
+       dataView : {show: true, readOnly: false},
+       magicType : {
+show: true, 
+      type: ['pie', 'funnel'],
+      option: {
+funnel: {
+x: '25%',
+   width: '50%',
+   funnelAlign: 'left',
+   max: 1548
+        }
+      }
+       },
+restore : {show: true},
+          saveAsImage : {show: true}
+       }
+         },
+calculable : true,
+             series : [
+             {
+name:'访问来源',
+     type:'pie',
+     radius : '55%',
+     center: ['50%', '60%'],
+     data:[
+     ]
+             }
+        ]
+};
+
+$.get("industry",function(json){
+        var len=json.data.length;
+        for(var i=0;i<len;i++){
+
+            industry.xAxis[0].data.push(json.data[i].name);
+            industry.series[0]["data"].push(json.data[i].value);
+            pie.legend['data'].push(json.data[i].name)
+            
+        }
+            pie.series[0]["data"]=json.data;
+        }
+        ,"json");
+
+$.get("area",function(json){
+        area.xAxis[0].data=json.type;
+        area.series[0]["data"]=json.num;
+        }
+        ,"json");
+
+$.get("map",function(json){
+        china_map.series[0]["data"]=json.map_data;
+        }
+        ,"json");
+
+
+
+function DrawIndustry(ec){
+
+    // 基于准备好的dom，初始化echarts图表
+    var myChart = ec.init(document.getElementById('industry')); 
+
+    // 为echarts对象加载数据 
+    myChart.setOption(industry); 
+}
+
+function DrawArea(ec){
+
+    // 基于准备好的dom，初始化echarts图表
+    var myChart = ec.init(document.getElementById('area')); 
+
+    // 为echarts对象加载数据 
+    myChart.setOption(area); 
+}
+
+function DrawChinamap(ec){
+
+    // 基于准备好的dom，初始化echarts图表
+    var myChart = ec.init(document.getElementById('map')); 
+
+    // 为echarts对象加载数据 
+    myChart.setOption(china_map); 
+}
+
+function DrawPie(ec){
+
+    // 基于准备好的dom，初始化echarts图表
+    var myChart = ec.init(document.getElementById('pie')); 
+
+    // 为echarts对象加载数据 
+    myChart.setOption(pie); 
+}
+
+
+
+// 使用
+require(
+        [
+        'echarts',
+        'echarts/chart/bar', // 使用柱状图就加载bar模块，按需加载
+        'echarts/chart/map', // 使用柱状图就加载bar模块，按需加载
+        'echarts/chart/pie', // 使用柱状图就加载bar模块，按需加载
+        ],
+        function (ec) {
+        DrawIndustry(ec);
+        DrawPie(ec);
+        DrawArea(ec);
+        DrawChinamap(ec);
+
+        }
+       );
+</script>
+</body>
